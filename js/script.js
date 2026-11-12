@@ -58,9 +58,9 @@ document.getElementById("calendar-button").addEventListener("click", () => {
 });
 
 const storageKeys = {
-    rsvp: "alya-raka-rsvp",
-    wishes: "alya-raka-wishes"
+    rsvp: "alya-raka-rsvp"
 };
+const wishesApiUrl = "https://script.google.com/macros/s/AKfycbx3fmrM2sT_IoCdiC8MvuVcm0Fos_ml-KPnbRAeP6w1VMzk__7W80BWwrJI7fLREQuz/exec";
 
 function setupFormPicker(pickerId, initialValue, initialText) {
     const picker = document.getElementById(pickerId);
@@ -164,15 +164,78 @@ document.getElementById("rsvp-form").addEventListener("submit", (event) => {
     }
 });
 
-function renderWishes() {
+function requestSharedWishes() {
+    return new Promise((resolve, reject) => {
+        if (!wishesApiUrl) {
+            reject(new Error("Google Sheets belum dikonfigurasi."));
+            return;
+        }
+
+        const callbackName = `wishCallback_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        const endpoint = new URL(wishesApiUrl);
+        const script = document.createElement("script");
+        const timeout = window.setTimeout(() => {
+            cleanup();
+            reject(new Error("Permintaan ucapan melewati batas waktu."));
+        }, 15000);
+
+        function cleanup() {
+            window.clearTimeout(timeout);
+            delete window[callbackName];
+            script.remove();
+        }
+
+        window[callbackName] = (result) => {
+            cleanup();
+            if (!result || !result.ok || !Array.isArray(result.wishes)) {
+                reject(new Error(result && result.error ? result.error : "Respons ucapan tidak valid."));
+                return;
+            }
+            resolve(result.wishes);
+        };
+
+        script.onerror = () => {
+            cleanup();
+            reject(new Error("Ucapan tidak dapat dimuat dari Google Sheets."));
+        };
+        endpoint.searchParams.set("callback", callbackName);
+        script.src = endpoint.toString();
+        document.head.append(script);
+    });
+}
+
+async function saveSharedWish(wish) {
+    if (!wishesApiUrl) throw new Error("Google Sheets belum dikonfigurasi.");
+
+    await fetch(wishesApiUrl, {
+        method: "POST",
+        mode: "no-cors",
+        body: new URLSearchParams(wish)
+    });
+
+    const deadline = Date.now() + 15000;
+    let lastError;
+    while (Date.now() < deadline) {
+        try {
+            const wishes = await requestSharedWishes();
+            if (wishes.some((entry) => entry.id === wish.id)) return wishes;
+        } catch (error) {
+            lastError = error;
+        }
+        await new Promise((resolve) => window.setTimeout(resolve, 900));
+    }
+
+    throw lastError || new Error("Ucapan belum ditemukan setelah dikirim.");
+}
+
+function renderWishes(wishes, emptyMessage) {
     const list = document.getElementById("wish-list");
-    const wishes = JSON.parse(localStorage.getItem(storageKeys.wishes) || "[]");
     list.replaceChildren();
 
     if (wishes.length === 0) {
         const empty = document.createElement("p");
         empty.className = "empty-wishes";
-        empty.textContent = "Jadilah yang pertama mengirimkan doa.";
+        empty.textContent = emptyMessage || "Jadilah yang pertama mengirimkan doa.";
         list.append(empty);
         return;
     }
@@ -189,21 +252,41 @@ function renderWishes() {
     });
 }
 
-document.getElementById("wish-form").addEventListener("submit", (event) => {
+async function loadSharedWishes() {
+    try {
+        renderWishes(await requestSharedWishes());
+    } catch (error) {
+        renderWishes([], wishesApiUrl
+            ? "Ucapan belum dapat dimuat. Muat ulang halaman untuk mencoba kembali."
+            : "Daftar ucapan akan tampil setelah Google Sheets dikonfigurasi.");
+    }
+}
+
+document.getElementById("wish-form").addEventListener("submit", async (event) => {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const wishes = JSON.parse(localStorage.getItem(storageKeys.wishes) || "[]");
-    wishes.push({
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const wish = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
         name: String(formData.get("name")).trim(),
         message: String(formData.get("message")).trim()
-    });
-    localStorage.setItem(storageKeys.wishes, JSON.stringify(wishes));
-    event.currentTarget.reset();
-    renderWishes();
-    showToast("Ucapan dan doa Anda berhasil ditambahkan.");
+    };
+    const submitButton = form.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    showToast("Mengirim ucapan...");
+    try {
+        const wishes = await saveSharedWish(wish);
+        form.reset();
+        renderWishes(wishes);
+        showToast("Ucapan dan doa Anda berhasil ditambahkan.");
+    } catch (error) {
+        showToast("Pengiriman belum dapat dikonfirmasi. Periksa koneksi dan daftar ucapan sebelum mencoba lagi.");
+    } finally {
+        submitButton.disabled = false;
+    }
 });
 
-renderWishes();
+loadSharedWishes();
 
 document.querySelectorAll(".copy-button").forEach((button) => {
     button.addEventListener("click", async () => {
