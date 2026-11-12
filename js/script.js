@@ -299,48 +299,25 @@ document.querySelectorAll(".copy-button").forEach((button) => {
     });
 });
 
-let audioContext;
-let musicTimer;
-let noteIndex = 0;
-const musicNotes = [261.63, 329.63, 392, 329.63, 293.66, 349.23, 440, 349.23];
 const musicButton = document.getElementById("music-toggle");
-
-function playSoftNote() {
-    if (!audioContext || audioContext.state !== "running") return;
-    const now = audioContext.currentTime;
-    const oscillator = audioContext.createOscillator();
-    const volume = audioContext.createGain();
-    oscillator.type = "sine";
-    oscillator.frequency.value = musicNotes[noteIndex % musicNotes.length];
-    volume.gain.setValueAtTime(0.0001, now);
-    volume.gain.exponentialRampToValueAtTime(0.035, now + 0.3);
-    volume.gain.exponentialRampToValueAtTime(0.0001, now + 2.4);
-    oscillator.connect(volume);
-    volume.connect(audioContext.destination);
-    oscillator.start(now);
-    oscillator.stop(now + 2.5);
-    noteIndex += 1;
-}
+const musicPlayer = new Audio("mp3/backsound.mp3");
+musicPlayer.loop = true;
+musicPlayer.preload = "none";
 
 musicButton.addEventListener("click", async () => {
-    if (musicTimer) {
-        window.clearInterval(musicTimer);
-        musicTimer = undefined;
+    if (!musicPlayer.paused) {
+        musicPlayer.pause();
         musicButton.setAttribute("aria-pressed", "false");
         musicButton.setAttribute("aria-label", "Nyalakan musik");
         showToast("Musik dimatikan.");
         return;
     }
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) {
-        showToast("Browser ini belum mendukung pemutar musik.");
-        return;
+    try {
+        await musicPlayer.play();
+        musicButton.setAttribute("aria-pressed", "true");
+        musicButton.setAttribute("aria-label", "Matikan musik");
+        showToast("Musik latar dinyalakan.");
+    } catch (error) {
+        showToast("Musik tidak dapat diputar. Periksa file mp3/backsound.mp3.");
     }
-    audioContext = audioContext || new AudioContext();
-    await audioContext.resume();
-    playSoftNote();
-    musicTimer = window.setInterval(playSoftNote, 1800);
-    musicButton.setAttribute("aria-pressed", "true");
-    musicButton.setAttribute("aria-label", "Matikan musik");
-    showToast("Musik latar dinyalakan.");
 });
