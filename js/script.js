@@ -1,3 +1,9 @@
+if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+
+window.addEventListener("pageshow", (event) => {
+    if (!event.persisted) window.scrollTo(0, 0);
+});
+
 const weddingDate = new Date("2026-11-22T08:00:00+07:00");
 const hostWhatsAppNumber = "";
 const toast = document.getElementById("toast");
@@ -29,32 +35,9 @@ updateCountdown();
 window.setInterval(updateCountdown, 1000);
 
 document.getElementById("open-invitation").addEventListener("click", () => {
+    document.documentElement.classList.remove("scroll-locked");
+    if (musicPlayer.paused) musicButton.click();
     document.getElementById("pembuka").scrollIntoView({ behavior: "smooth" });
-});
-
-document.getElementById("calendar-button").addEventListener("click", () => {
-    const start = "20270516T010000Z";
-    const end = "20270516T070000Z";
-    const calendar = [
-        "BEGIN:VCALENDAR",
-        "VERSION:2.0",
-        "PRODID:-//Alya dan Raka//Undangan Pernikahan//ID",
-        "BEGIN:VEVENT",
-        `DTSTART:${start}`,
-        `DTEND:${end}`,
-        "SUMMARY:Pernikahan Alya dan Raka",
-        "LOCATION:The Garden Hall\\, Jl. Pahlawan No. 21\\, Bandung",
-        "DESCRIPTION:Akad nikah pukul 08.00 WIB dan resepsi pukul 11.00 WIB.",
-        "END:VEVENT",
-        "END:VCALENDAR"
-    ].join("\r\n");
-    const url = URL.createObjectURL(new Blob([calendar], { type: "text/calendar;charset=utf-8" }));
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "undangan-alya-raka.ics";
-    link.click();
-    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-    showToast("Jadwal pernikahan berhasil ditambahkan ke unduhan kalender.");
 });
 
 const storageKeys = {

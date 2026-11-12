@@ -19,6 +19,10 @@ html {
     scroll-padding-top: 68px;
 }
 
+html.scroll-locked {
+    overflow: hidden;
+}
+
 body {
     margin: 0;
     min-width: 320px;
@@ -49,7 +53,7 @@ a {
     max-width: 1100px;
     min-height: 100vh;
     margin: 0 auto;
-    overflow: hidden;
+    overflow: clip;
     background: var(--paper);
     box-shadow: 0 0 60px rgb(46 42 32 / 8%);
 }
@@ -272,8 +276,46 @@ a {
 }
 
 .couple {
+    position: relative;
     padding-top: 63px;
     padding-bottom: 60px;
+}
+
+.couple-corner {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border: 1px solid #c5b99d;
+    opacity: .7;
+    pointer-events: none;
+}
+
+.couple-corner-top-left {
+    top: 18px;
+    left: 18px;
+    border-right: 0;
+    border-bottom: 0;
+}
+
+.couple-corner-top-right {
+    top: 18px;
+    right: 18px;
+    border-bottom: 0;
+    border-left: 0;
+}
+
+.couple-corner-bottom-left {
+    bottom: 18px;
+    left: 18px;
+    border-top: 0;
+    border-right: 0;
+}
+
+.couple-corner-bottom-right {
+    right: 18px;
+    bottom: 18px;
+    border-top: 0;
+    border-left: 0;
 }
 
 .couple h2 {
@@ -291,6 +333,7 @@ a {
     margin: 0 auto 17px;
     background-position: center;
     background-size: cover;
+    border-radius: 10px;
 }
 
 .portrait-bride {
@@ -543,11 +586,6 @@ a {
 
 .button-outline:hover {
     background: #efede5;
-}
-
-.calendar-button {
-    width: 100%;
-    margin-top: 18px;
 }
 
 .rsvp {
@@ -834,6 +872,29 @@ a {
     text-decoration: none;
 }
 
+.developer-social-links {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.developer-social-link {
+    display: inline-flex;
+    align-items: center;
+    color: var(--olive);
+    text-decoration: none;
+}
+
+.developer-social-icon {
+    width: 16px;
+    height: 16px;
+    flex: none;
+}
+
+.developer-social-link:hover {
+    text-decoration: underline;
+}
+
 .toast {
     position: fixed;
     z-index: 10;
@@ -998,8 +1059,7 @@ a {
     }
 
     .events>.eyebrow,
-    .events>h2,
-    .events>.calendar-button {
+    .events>h2 {
         grid-column: 1 / -1;
     }
 
@@ -1009,11 +1069,6 @@ a {
 
     .event-card {
         width: 100%;
-    }
-
-    .calendar-button {
-        max-width: 320px;
-        justify-self: center;
     }
 
     .rsvp-form {
