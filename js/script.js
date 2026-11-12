@@ -5,7 +5,6 @@ window.addEventListener("pageshow", (event) => {
 });
 
 const weddingDate = new Date("2026-11-22T08:00:00+07:00");
-const hostWhatsAppNumber = "";
 const toast = document.getElementById("toast");
 let toastTimeout;
 
@@ -40,10 +39,7 @@ document.getElementById("open-invitation").addEventListener("click", () => {
     document.getElementById("pembuka").scrollIntoView({ behavior: "smooth" });
 });
 
-const storageKeys = {
-    rsvp: "alya-raka-rsvp"
-};
-const wishesApiUrl = "https://script.google.com/macros/s/AKfycbx3fmrM2sT_IoCdiC8MvuVcm0Fos_ml-KPnbRAeP6w1VMzk__7W80BWwrJI7fLREQuz/exec";
+const wishesApiUrl = "https://script.google.com/macros/s/AKfycbznpVANqsx1scpvwKQbqnpScmWh2kvBREUocQFmNGosBMGwl0DP4hQMoGw9fad7b4wx/exec";
 
 function setupFormPicker(pickerId, initialValue, initialText) {
     const picker = document.getElementById(pickerId);
@@ -119,31 +115,36 @@ function setupFormPicker(pickerId, initialValue, initialText) {
 const attendancePicker = setupFormPicker("rsvp-attendance-picker", "", "Pilih konfirmasi");
 const guestsPicker = setupFormPicker("rsvp-guests-picker", "1", "1 orang");
 
-document.getElementById("rsvp-form").addEventListener("submit", (event) => {
+document.getElementById("rsvp-form").addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!attendancePicker.valueInput.value) {
         showToast("Silakan pilih konfirmasi kehadiran.");
         document.getElementById("rsvp-attendance-trigger").focus();
         return;
     }
-    const formData = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    const formData = new FormData(form);
     const response = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
         name: String(formData.get("name")).trim(),
         attendance: String(formData.get("attendance")),
         guests: String(formData.get("guests"))
     };
-    const responses = JSON.parse(localStorage.getItem(storageKeys.rsvp) || "[]");
-    responses.push(response);
-    localStorage.setItem(storageKeys.rsvp, JSON.stringify(responses));
-    event.currentTarget.reset();
-    attendancePicker.reset();
-    guestsPicker.reset();
-    if (/^\d{8,15}$/.test(hostWhatsAppNumber)) {
-        const message = `Konfirmasi undangan Alya & Raka\nNama: ${response.name}\nKehadiran: ${response.attendance}\nJumlah tamu: ${response.guests}`;
-        window.open(`https://wa.me/${hostWhatsAppNumber}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
-        showToast("Konfirmasi tersimpan. WhatsApp dibuka untuk mengirimkannya kepada tuan rumah.");
-    } else {
-        showToast("Konfirmasi tersimpan di perangkat ini. Atur nomor WhatsApp tuan rumah di js/script.js agar dapat dikirim.");
+    const submitButton = form.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    showToast("Menyimpan konfirmasi kehadiran...");
+    try {
+        await saveRsvp(response);
+        form.reset();
+        attendancePicker.reset();
+        guestsPicker.reset();
+        showToast("Konfirmasi kehadiran berhasil disimpan.");
+    } catch (error) {
+        showToast(error instanceof Error
+            ? error.message
+            : "Konfirmasi belum dapat disimpan. Periksa koneksi lalu coba kembali.");
+    } finally {
+        submitButton.disabled = false;
     }
 });
 
@@ -185,6 +186,68 @@ function requestSharedWishes() {
         script.src = endpoint.toString();
         document.head.append(script);
     });
+}
+
+function requestRsvpStatus(id) {
+    return new Promise((resolve, reject) => {
+        const callbackName = `rsvpCallback_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        const endpoint = new URL(wishesApiUrl);
+        const script = document.createElement("script");
+        const timeout = window.setTimeout(() => {
+            cleanup();
+            reject(new Error("Pemeriksaan penyimpanan RSVP melewati batas waktu."));
+        }, 5000);
+
+        function cleanup() {
+            window.clearTimeout(timeout);
+            delete window[callbackName];
+            script.remove();
+        }
+
+        window[callbackName] = (result) => {
+            cleanup();
+            if (!result || !result.ok || typeof result.exists !== "boolean") {
+                reject(new Error(result && result.error
+                    ? result.error
+                    : "Status penyimpanan RSVP tidak valid. Pastikan Apps Script sudah diperbarui."));
+                return;
+            }
+            resolve(result.exists);
+        };
+
+        script.onerror = () => {
+            cleanup();
+            reject(new Error("Status RSVP tidak dapat diperiksa dari Google Sheets."));
+        };
+        endpoint.searchParams.set("action", "rsvp-status");
+        endpoint.searchParams.set("id", id);
+        endpoint.searchParams.set("callback", callbackName);
+        script.src = endpoint.toString();
+        document.head.append(script);
+    });
+}
+
+async function saveRsvp(response) {
+    if (!wishesApiUrl) throw new Error("Google Sheets belum dikonfigurasi.");
+
+    await fetch(wishesApiUrl, {
+        method: "POST",
+        mode: "no-cors",
+        body: new URLSearchParams({ ...response, action: "rsvp" })
+    });
+
+    const deadline = Date.now() + 15000;
+    let lastError;
+    while (Date.now() < deadline) {
+        try {
+            if (await requestRsvpStatus(response.id)) return;
+        } catch (error) {
+            lastError = error;
+        }
+        await new Promise((resolve) => window.setTimeout(resolve, 900));
+    }
+
+    throw lastError || new Error("Konfirmasi belum ditemukan di Google Sheets.");
 }
 
 async function saveSharedWish(wish) {
