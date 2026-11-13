@@ -65,7 +65,7 @@ a {
     min-height: min(100svh, 900px);
     place-items: center;
     overflow: hidden;
-    background: #696354 url("https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=90") center 48% / cover;
+    background: #696354 url("../img/Preewed 1.png") center 48% / cover;
     color: #fffdf8;
     text-align: center;
 }
@@ -337,11 +337,11 @@ a {
 }
 
 .portrait-bride {
-    background-image: url("../img/Dika.jpeg");
+    background-image: url("../img/Dika.png");
 }
 
 .portrait-groom {
-    background-image: url("../img/Pasha.jpeg");
+    background-image: url("../img/Pasha.png");
 }
 
 .couple-card h3 {
