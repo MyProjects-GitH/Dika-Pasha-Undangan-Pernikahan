@@ -27,6 +27,8 @@ function updateCountdown() {
 updateCountdown();
 window.setInterval(updateCountdown, 1000);
 
+let galleryDrag = null;
+
 document.querySelectorAll(".gallery-grid").forEach((gallery) => {
     const galleryImages = Array.from(gallery.querySelectorAll("img"));
     if (galleryImages.length < 2) return;
@@ -40,18 +42,67 @@ document.querySelectorAll(".gallery-grid").forEach((gallery) => {
     duplicateGroup.setAttribute("aria-hidden", "true");
 
     galleryImages.forEach((image) => {
+        image.decoding = "async";
         originalGroup.append(image);
         const duplicate = image.cloneNode(true);
-        duplicate.loading = "eager";
+        duplicate.loading = "lazy";
+        duplicate.decoding = "async";
+        duplicate.draggable = false;
         duplicateGroup.append(duplicate);
+        image.draggable = false;
     });
 
     galleryTrack.append(originalGroup, duplicateGroup);
     gallery.replaceChildren(galleryTrack);
+    gallery.addEventListener("pointerdown", (event) => {
+        if (event.pointerType === "mouse" && event.button !== 0) return;
+        if (galleryDrag) resumeGalleryScroll();
+
+        const animation = galleryTrack.getAnimations().find((item) => item.animationName === "gallery-scroll");
+        if (!animation || !animation.effect) return;
+        const duration = Number(animation.effect.getTiming().duration);
+        const distance = galleryTrack.getBoundingClientRect().width / 2;
+        if (!Number.isFinite(duration) || duration <= 0 || distance <= 0) return;
+
+        const currentTime = Number(animation.currentTime);
+        animation.pause();
+        galleryDrag = {
+            gallery,
+            animation,
+            startX: event.clientX,
+            startTime: Number.isFinite(currentTime) ? currentTime : 0,
+            duration,
+            distance,
+            direction: gallery.classList.contains("gallery-grid--reverse") ? 1 : -1
+        };
+        gallery.classList.add("is-paused");
+        gallery.setPointerCapture(event.pointerId);
+    });
+    gallery.addEventListener("pointermove", (event) => {
+        if (!galleryDrag || galleryDrag.gallery !== gallery) return;
+        const { animation, direction, distance, duration, startTime, startX } = galleryDrag;
+        const timeDelta = (event.clientX - startX) * duration / distance * direction;
+        const nextTime = (startTime + timeDelta) % duration;
+        animation.currentTime = nextTime < 0 ? nextTime + duration : nextTime;
+    });
+    gallery.addEventListener("contextmenu", (event) => {
+        if (event.target instanceof HTMLImageElement) event.preventDefault();
+    });
 });
+
+function resumeGalleryScroll() {
+    if (!galleryDrag) return;
+    galleryDrag.gallery.classList.remove("is-paused");
+    galleryDrag.animation.play();
+    galleryDrag = null;
+}
+
+window.addEventListener("pointerup", resumeGalleryScroll);
+window.addEventListener("pointercancel", resumeGalleryScroll);
 
 document.getElementById("open-invitation").addEventListener("click", () => {
     document.documentElement.classList.remove("scroll-locked");
+    musicButton.hidden = false;
     if (musicPlayer.paused) musicButton.click();
     document.getElementById("pembuka").scrollIntoView({ behavior: "smooth" });
 });
@@ -372,14 +423,12 @@ musicButton.addEventListener("click", async () => {
         musicPlayer.pause();
         musicButton.setAttribute("aria-pressed", "false");
         musicButton.setAttribute("aria-label", "Nyalakan musik");
-        showToast("Musik dimatikan.");
         return;
     }
     try {
         await musicPlayer.play();
         musicButton.setAttribute("aria-pressed", "true");
         musicButton.setAttribute("aria-label", "Matikan musik");
-        showToast("Musik latar dinyalakan.");
     } catch (error) {
         showToast("Musik tidak dapat diputar. Periksa file mp3/backsound.mp3.");
     }
