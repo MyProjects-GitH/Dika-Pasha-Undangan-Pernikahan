@@ -1,9 +1,3 @@
-if ("scrollRestoration" in history) history.scrollRestoration = "manual";
-
-window.addEventListener("pageshow", (event) => {
-    if (!event.persisted) window.scrollTo(0, 0);
-});
-
 const weddingDate = new Date("2026-11-22T08:00:00+07:00");
 const toast = document.getElementById("toast");
 let toastTimeout;
@@ -32,6 +26,29 @@ function updateCountdown() {
 
 updateCountdown();
 window.setInterval(updateCountdown, 1000);
+
+document.querySelectorAll(".gallery-grid").forEach((gallery) => {
+    const galleryImages = Array.from(gallery.querySelectorAll("img"));
+    if (galleryImages.length < 2) return;
+
+    const galleryTrack = document.createElement("div");
+    const originalGroup = document.createElement("div");
+    const duplicateGroup = document.createElement("div");
+    galleryTrack.className = "gallery-track";
+    originalGroup.className = "gallery-group";
+    duplicateGroup.className = "gallery-group";
+    duplicateGroup.setAttribute("aria-hidden", "true");
+
+    galleryImages.forEach((image) => {
+        originalGroup.append(image);
+        const duplicate = image.cloneNode(true);
+        duplicate.loading = "eager";
+        duplicateGroup.append(duplicate);
+    });
+
+    galleryTrack.append(originalGroup, duplicateGroup);
+    gallery.replaceChildren(galleryTrack);
+});
 
 document.getElementById("open-invitation").addEventListener("click", () => {
     document.documentElement.classList.remove("scroll-locked");
