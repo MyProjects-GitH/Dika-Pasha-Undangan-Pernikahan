@@ -290,7 +290,7 @@ a {
 }
 
 .portrait-bride {
-    background-image: url("../img/Dika.png");
+    background-image: url("../img/optimized/g1.jpg");
 }
 
 .couple-card h3 {
@@ -960,8 +960,19 @@ a {
 }
 
 @media (min-width: 600px) {
+    body {
+        background: #d9d0bc;
+    }
+
+    .invitation {
+        max-width: 1180px;
+        margin: 0 auto;
+        box-shadow: 0 0 40px rgb(33 27 27 / 16%);
+    }
+
     .cover {
         min-height: min(78vh, 760px);
+        background-position: center 46%;
     }
 
     .cover-content {
@@ -991,14 +1002,80 @@ a {
         margin-left: auto;
     }
 
+    .intro {
+        min-height: 620px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background:
+            linear-gradient(180deg, rgb(0 0 0 / 38%), rgb(0 0 0 / 48%)),
+            url("../img/optimized/img 2.jpg") center 42% / cover;
+    }
+
+    .intro .intro-copy,
+    .intro .closing-greeting,
+    .intro .ornament {
+        color: #fff;
+    }
+
+    .intro .intro-copy {
+        max-width: 720px;
+        text-shadow: 0 2px 12px rgb(0 0 0 / 30%);
+    }
+
+    .couple {
+        min-height: 620px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background:
+            linear-gradient(180deg, rgb(0 0 0 / 32%), rgb(0 0 0 / 58%)),
+            url("../img/optimized/img 3.jpg") center 38% / cover;
+    }
+
+    .couple--woman {
+        background:
+            linear-gradient(180deg, rgb(0 0 0 / 32%), rgb(0 0 0 / 58%)),
+            url("../img/optimized/img 4.jpg") center 38% / cover;
+    }
+
+    .couple-card h3,
+    .couple-card p {
+        color: #fff;
+    }
+
+    .couple-card p {
+        color: rgb(255 255 255 / 82%);
+    }
+
+    .couple-card {
+        max-width: 360px;
+    }
+
+    .couple-info {
+        padding: 10px 14px;
+        border-radius: 4px;
+        background: rgb(33 27 27 / 18%);
+    }
+
     .portrait {
         width: min(100%, 240px);
         height: 270px;
     }
 
     .countdown-section {
+        min-height: 520px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
         padding-top: 68px;
         padding-bottom: 72px;
+        background:
+            linear-gradient(180deg, rgb(0 0 0 / 42%), rgb(0 0 0 / 58%) 65%, rgb(0 0 0 / 72%)),
+            url("../img/optimized/img 5.jpg") center 48% / cover;
     }
 
     .countdown {
@@ -1083,6 +1160,79 @@ a {
         height: clamp(250px, 40vw, 420px);
         margin-right: calc(clamp(48px, 9vw, 110px) * -1);
         margin-left: calc(clamp(48px, 9vw, 110px) * -1);
+        background: url("../img/optimized/g8.jpg") center 48% / cover;
+    }
+
+    .events {
+        min-height: 680px;
+        align-content: center;
+        background:
+            linear-gradient(180deg, rgb(0 0 0 / 44%), rgb(0 0 0 / 58%)),
+            url("../img/optimized/g5.jpg") center 48% / cover;
+        color: #fff;
+    }
+
+    .events .eyebrow,
+    .events h2 em,
+    .events .event-type,
+    .events .event-icon,
+    .events .text-link {
+        color: var(--gold);
+    }
+
+    .events .event-card {
+        border-color: rgb(212 180 119 / 55%);
+        background: rgb(0 0 0 / 42%);
+        backdrop-filter: blur(3px);
+    }
+
+    .events .event-time,
+    .events .venue-address {
+        color: rgb(255 255 255 / 82%);
+    }
+
+    .rsvp,
+    .wishes,
+    .gift {
+        min-height: 680px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .rsvp {
+        background:
+            linear-gradient(rgb(42 8 18 / 72%), rgb(42 8 18 / 82%)),
+            url("../img/optimized/g4.jpg") center / cover;
+    }
+
+    .wishes {
+        background:
+            linear-gradient(rgb(33 27 27 / 52%), rgb(33 27 27 / 66%)),
+            url("../img/optimized/g2.jpg") center / cover;
+        color: #fff;
+    }
+
+    .wishes .eyebrow,
+    .wishes h2 em,
+    .wishes .empty-wishes {
+        color: var(--gold);
+    }
+
+    .wishes .empty-wishes,
+    .wishes .wish-entry p {
+        color: rgb(255 255 255 / 82%);
+    }
+
+    .wishes .wish-entry {
+        background: rgb(0 0 0 / 38%);
+    }
+
+    .gift {
+        background:
+            linear-gradient(rgb(255 255 255 / 76%), rgb(255 255 255 / 88%)),
+            url("../img/optimized/g6.jpg") center / cover;
     }
 }
 
