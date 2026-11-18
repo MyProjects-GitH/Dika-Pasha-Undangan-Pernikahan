@@ -384,7 +384,11 @@ a {
 .gallery-track {
     display: flex;
     width: max-content;
-    animation: gallery-scroll 50s linear infinite;
+    animation: gallery-scroll 60s linear infinite;
+}
+
+.gallery-grid--reverse {
+    margin-top: 5px;
 }
 
 .gallery-grid--reverse .gallery-track {
@@ -403,7 +407,7 @@ a {
 }
 
 .gallery-grid img {
-    width: 60cqw;
+    width: 40cqw;
     height: auto;
     aspect-ratio: 1 / 1;
     object-fit: cover;
@@ -411,6 +415,17 @@ a {
     -webkit-touch-callout: none;
     -webkit-user-drag: none;
     user-select: none;
+}
+
+.gallery-group > a {
+    flex: none;
+    cursor: zoom-in;
+    line-height: 0;
+}
+
+.gallery-group > a:focus-visible {
+    outline: 2px solid var(--burgundy);
+    outline-offset: 3px;
 }
 
 @keyframes gallery-scroll {
@@ -1106,7 +1121,7 @@ a {
         justify-content: center;
         background:
             linear-gradient(rgb(0 0 0 / 62%), rgb(0 0 0 / 62%)),
-            url("../img/g48.jpg") center / cover;
+            url("../img/optimized/g8.jpg") center / cover;
         color: var(--cream);
     }
 
@@ -1137,7 +1152,7 @@ a {
         justify-content: center;
         background:
             linear-gradient(rgb(0 0 0 / 62%), rgb(0 0 0 / 62%)),
-            url("../img/g37.jpg") center / cover;
+            url("../img/optimized/g6.jpg") center / cover;
         color: var(--cream);
     }
 
@@ -1158,7 +1173,7 @@ a {
         justify-content: center;
         background:
             linear-gradient(rgb(0 0 0 / 62%), rgb(0 0 0 / 62%)),
-            url("../img/g50.jpg") center / cover;
+            url("../img/optimized/g2.jpg") center / cover;
         color: var(--cream);
     }
 
@@ -1184,7 +1199,7 @@ a {
         justify-content: center;
         background:
             linear-gradient(rgb(0 0 0 / 62%), rgb(0 0 0 / 62%)),
-            url("../img/optimized/g23.jpg") center / cover;
+            url("../img/optimized/g4.jpg") center / cover;
     }
 
     .events {
@@ -1195,7 +1210,7 @@ a {
         justify-content: center;
         background:
             linear-gradient(180deg, rgb(0 0 0 / 48%), rgb(0 0 0 / 58%)),
-            url("../img/optimized/g25.jpg") center / cover;
+            url("../img/optimized/g5.jpg") center / cover;
         color: #fff;
     }
 

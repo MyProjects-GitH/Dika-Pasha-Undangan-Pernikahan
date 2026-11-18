@@ -43,7 +43,15 @@ document.querySelectorAll(".gallery-grid").forEach((gallery) => {
 
     galleryImages.forEach((image) => {
         image.decoding = "async";
-        originalGroup.append(image);
+        const imageLink = document.createElement("a");
+        imageLink.href = image.getAttribute("src").replace("img/optimized/", "img/");
+        imageLink.dataset.pswpWidth = "4000";
+        imageLink.dataset.pswpHeight = "6000";
+        imageLink.setAttribute("aria-label", `Perbesar foto: ${image.alt}`);
+        image.before(imageLink);
+        imageLink.append(image);
+        originalGroup.append(imageLink);
+
         const duplicate = image.cloneNode(true);
         duplicate.loading = "lazy";
         duplicate.decoding = "async";
@@ -56,6 +64,7 @@ document.querySelectorAll(".gallery-grid").forEach((gallery) => {
     gallery.replaceChildren(galleryTrack);
     gallery.addEventListener("pointerdown", (event) => {
         if (event.pointerType === "mouse" && event.button !== 0) return;
+        if (event.target.closest("a")) return;
         if (galleryDrag) resumeGalleryScroll();
 
         const animation = galleryTrack.getAnimations().find((item) => item.animationName === "gallery-scroll");
@@ -414,7 +423,7 @@ document.querySelectorAll(".copy-button").forEach((button) => {
 });
 
 const musicButton = document.getElementById("music-toggle");
-const musicPlayer = new Audio("mp3/backsound.mp3");
+const musicPlayer = new Audio("mp3/Bernaung (From Setetes Embun Cinta Niyala ).mp3");
 musicPlayer.loop = true;
 musicPlayer.preload = "none";
 
