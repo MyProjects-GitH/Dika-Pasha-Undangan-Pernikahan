@@ -44,7 +44,9 @@ document.querySelectorAll(".gallery-grid").forEach((gallery) => {
     galleryImages.forEach((image) => {
         image.decoding = "async";
         const imageLink = document.createElement("a");
-        imageLink.href = image.getAttribute("src").replace("img/optimized/", "img/");
+        imageLink.href = image.getAttribute("src")
+            .replace("img/optimized/", "img/")
+            .replace(/\.jpg$/, ".jpeg");
         imageLink.dataset.pswpWidth = "4000";
         imageLink.dataset.pswpHeight = "6000";
         imageLink.setAttribute("aria-label", `Perbesar foto: ${image.alt}`);
