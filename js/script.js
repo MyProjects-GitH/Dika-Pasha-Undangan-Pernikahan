@@ -48,7 +48,7 @@ document.querySelectorAll(".gallery-grid").forEach((gallery) => {
             .replace("img/optimized/", "img/")
             .replace(/\.jpg$/, ".jpeg");
         imageLink.dataset.pswpWidth = "4000";
-        imageLink.dataset.pswpHeight = "6000";
+        imageLink.dataset.pswpHeight = "4000";
         imageLink.setAttribute("aria-label", `Perbesar foto: ${image.alt}`);
         image.before(imageLink);
         imageLink.append(image);
